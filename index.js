@@ -1,5 +1,13 @@
 #!/usr/bin/env node
 
+var pageres = require('pageres');
+
+pageres(['todomvc.com'], ['1366x768', '1600x900'], function () {
+    console.log('done');
+}, function () {
+    console.log('done err');
+});
+
 // MockJax -> client interceptor
 
 // <?xml version="1.0" encoding="UTF-8" ?> 
@@ -45,6 +53,10 @@ server.get('/echo/:name', function (req, res, next) {
   res.send(req.params);
   return next();
 });
+
+server.get(/\/assets\/?.*/, restify.serveStatic({
+  directory: './assets'
+}));
 
 server.listen(8080, function () {
   console.log('%s listening at %s', server.name, server.url);
