@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# This Python file uses the following encoding: utf-8
+#!/usr/bin/env node
 
 // MockJax -> client interceptor
 
@@ -9,9 +8,49 @@
 //   <allow-http-request-headers-from domain="*" headers="*" secure="false" /> 
 // </cross-domain-policy>
 
+// Project info:
+// https://github.com/alternatex/robohash.js 
+// https://github.com/e1ven/robohash
 
-# Find details about this project at https://github.com/e1ven/robohash
+var gm = require('gm');
+var restify = require('restify');
 
+var server = restify.createServer({
+  name: 'robohash.js',
+  version: '0.1.0'
+});
+
+server.use(restify.acceptParser(server.acceptable));
+server.use(restify.queryParser());
+server.use(restify.bodyParser());
+
+console.log(__dirname);
+
+/* -------------------------------------------------- */
+
+var dir = __dirname + '/imgs';
+
+/*
+gm(dir + '/original.png')
+  .contrast(5)
+  .write(dir + '/contrast.jpg', function(err){
+    if (err) return console.dir(arguments)
+    console.log(this.outname + ' created :: ' + arguments[3])
+  }
+) 
+*/
+/* -------------------------------------------------- */
+
+server.get('/echo/:name', function (req, res, next) {
+  res.send(req.params);
+  return next();
+});
+
+server.listen(8080, function () {
+  console.log('%s listening at %s', server.name, server.url);
+});
+
+/*
 from __future__ import unicode_literals
 import tornado.httpserver
 import tornado.ioloop
@@ -397,3 +436,4 @@ def main():
         tornado.ioloop.IOLoop.instance().start()
 if __name__ == "__main__":
         main()
+*/
