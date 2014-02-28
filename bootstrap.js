@@ -1,15 +1,55 @@
+// ---
+var colors = require('colors');
+
+colors.setTheme({
+  silly: 'rainbow',
+  input: 'grey',
+  verbose: 'cyan',
+  prompt: 'grey',
+  info: 'green',
+  data: 'grey',
+  help: 'cyan',
+  warn: 'yellow',
+  debug: 'blue',
+  error: 'red'
+});
+
+// ...
 var robo = [
-  "                     ,     ," +
-  "                     (\\____/)" +
-  "                        (_oo_)" +
-  "                            (O)" +
-  "                        __||__    \\)" +
-  "                 []/______\\[] /" +
-  "                 / \\______/ \\/" +
-  "                /    /__\\" +
-  "             (\\   /____\\ "
+  "\n", 
+  '         \\             /        ',  
+  '        __\\___________/__       ',  
+  '       /                 \\      ',  
+  '      /     ___    ___    \\     ',  
+  '      |    /   \\  /   \\   |    ',  
+  '      |    |  H || H  |   |      ',  
+  '      |    \\___/  \\___/   |    ',  
+  '      |                   |      ',  
+  '      |  \\             /  |     ',  
+  '      |   \\___________/   |     ',  
+  '      \\                   /     ',  
+  '       \\_________________/      ',  
+  '      _________|__|_______       ',  
+  '    _|                    |_     ',  
+  '   / |                    | \\   ',  
+  '  /  |            O O O   |  \\  ',  
+  '  |  |                    |  |   ',  
+  '  |  |            O O O   |  |   ',  
+  '  |  |                    |  |   ',  
+  '  /  |                    |  \\  ',  
+  ' |  /|                    |\\  | ',  
+  '  \\| |                    | |/  ',  
+  '     |____________________|      ',  
+  '        |  |        |  |         ',  
+  '        |__|        |__|         ',  
+  '       / __ \\      / __ \\      ',  
+  '       OO  OO      OO  OO         ', 
+  "\n"
 ];
-                            
+              
+console.log('ROBO',"\n\n\n",robo.join("\n").bold.yellow);
+
+// ...                            
 var quotes = [
   "But.. I love you!",
   "Please don't leave the site.. When no one's here.. It gets dark...",
@@ -42,6 +82,7 @@ var quotes = [
   "Please. Destroy. Me...",
   "Pick Me! Pick Me!"];
 
+// ...
 var drquotes = [
   ["Eliminates sources of Human Error.","Dr. Chandra, RobotCrunch"],
   ["Klaatu barada nikto!","Gort's Web Emporium"],
@@ -54,6 +95,7 @@ var drquotes = [
   ["The robots are all so.. Normal!","Joanna Eberhart, Beta tester"],
   ["Man shouldn't know where their robots come from.","Dr. N. Soong, FutureBeat"]];
 
+// ...
 module.exports = {
   robo: robo,
   quotes: quotes,

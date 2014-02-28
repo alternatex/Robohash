@@ -12,6 +12,26 @@
 /*                                                    */
 /* -------------------------------------------------- */
 
+// ---
+var colors = require('colors');
+
+colors.setTheme({
+  silly: 'rainbow',
+  input: 'grey',
+  verbose: 'cyan',
+  prompt: 'grey',
+  info: 'green',
+  data: 'grey',
+  help: 'cyan',
+  warn: 'yellow',
+  debug: 'blue',
+  error: 'red'
+});
+
+/* -------------------------------------------------- */
+/*                                                    */
+/* -------------------------------------------------- */
+
 var port = port || 8080;
 
 /* -------------------------------------------------- */
@@ -68,7 +88,6 @@ server.get('/echo/:name', function (req, res, next) {
 /*                                                    */
 /* -------------------------------------------------- */
 
-
 server.get(/\/assets\/?.*/, restify.serveStatic({
   directory: './assets'
 }));
@@ -88,14 +107,15 @@ server.get('/image/:name', function (req, res, next) {
   });  
   
   var fs = require('fs');
+  require('images');
 
-  false && gm(__dirname+'/assets/images/foreground/accessories/000-blue_accessory-01.png')
+  gm(__dirname+'/assets/images/foreground/accessories/000-blue_accessory-01.png')
     .background('transparent')
     .in(__dirname+'/assets/images/foreground/body/000-blue_body-10.png')
     .background('transparent')
     .in(__dirname+'/assets/images/foreground/accessories/002-blue_accessory-07.png')   
     .toBuffer(function (err, buffer) {
-    if (err) return handle(err);
+      if (err) return handle(err);
       res.end(buffer);
       console.log('done!2');
     }); 
@@ -106,9 +126,8 @@ server.get('/image/:name', function (req, res, next) {
 /* -------------------------------------------------- */
 
 var bootstrap = require('./bootstrap.js');
-
-console.log(bootstrap.robo.join("\n"));
-console.log("bootstrap", bootstrap, bootstrap.robo.join(""));
+var text = bootstrap.robo.join("\n").rainbow;
+console.log("bootstrap", bootstrap, text);
 
 /* -------------------------------------------------- */
 /*                                                    */
