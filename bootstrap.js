@@ -1,20 +1,15 @@
-// ---
-var colors = require('colors');
+/* -------------------------------------------------- */
+/*                                                    */
+/* -------------------------------------------------- */
 
-colors.setTheme({
-  silly: 'rainbow',
-  input: 'grey',
-  verbose: 'cyan',
-  prompt: 'grey',
-  info: 'green',
-  data: 'grey',
-  help: 'cyan',
-  warn: 'yellow',
-  debug: 'blue',
-  error: 'red'
-});
+var colors    = require('colors'),
+    gd        = require('node-gd'),
+    _         = require('underscore.deferred');
 
-// ...
+/* -------------------------------------------------- */
+/*                                                    */
+/* -------------------------------------------------- */
+
 var robo = [
   "\n", 
   '         \\             /        ',  
@@ -47,9 +42,10 @@ var robo = [
   "\n"
 ];
               
-console.log('ROBO',"\n\n\n",robo.join("\n").bold.yellow);
-
-// ...                            
+/* -------------------------------------------------- */
+/*                                                    */
+/* -------------------------------------------------- */
+                    
 var quotes = [
   "But.. I love you!",
   "Please don't leave the site.. When no one's here.. It gets dark...",
@@ -82,7 +78,10 @@ var quotes = [
   "Please. Destroy. Me...",
   "Pick Me! Pick Me!"];
 
-// ...
+/* -------------------------------------------------- */
+/*                                                    */
+/* -------------------------------------------------- */
+
 var drquotes = [
   ["Eliminates sources of Human Error.","Dr. Chandra, RobotCrunch"],
   ["Klaatu barada nikto!","Gort's Web Emporium"],
@@ -95,9 +94,62 @@ var drquotes = [
   ["The robots are all so.. Normal!","Joanna Eberhart, Beta tester"],
   ["Man shouldn't know where their robots come from.","Dr. N. Soong, FutureBeat"]];
 
-// ...
+/* -------------------------------------------------- */
+/*                                                    */
+/* -------------------------------------------------- */
+
 module.exports = {
   robo: robo,
   quotes: quotes,
-  drquotes: drquotes
+  drquotes: drquotes,
+  handleXXX: function handleXXX(req, res, next){
+
+    var retval = {
+      sizex: 300,
+      sizey: 300,
+      format: "png",
+      bgset: "",
+      color: ""
+    };  
+
+    var stack = [];
+
+    // ...
+    var stackimage = function stackimage(filename){
+
+      // deferred processing
+      var dfd = _.Deferred();
+
+      // ...
+      setTimeout(function(){
+        gd.openPng(filename, function(err, image) {
+          var dstX = 0, dstY = 0,
+              srcX = 0, srcY = 0,
+              dstW = 300, dstH = 300,            
+              srcW = 300, srcH = 300;
+          image.copyResampled(output, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
+          dfd.resolve();
+        });
+      }, 10);
+
+      return dfd.promise();
+    }
+
+    var output = null;
+    output = gd.createTrueColor(300, 300);
+    output.filledRectangle(0, 0, 300, 300, output.colorAllocate(255, 255, 0));
+
+    stack.push(stackimage("assets/images/foreground/body/004-blue_body-04.png"));
+    stack.push(stackimage("assets/images/foreground/face/000-blue_face-07.png"));
+    stack.push(stackimage("assets/images/foreground/accessories/000-blue_accessory-01.png"));
+    stack.push(stackimage("assets/images/foreground/mouth/006-blue_mouth-06.png"));
+    stack.push(stackimage("assets/images/foreground/eyes/004-blue_eyes-03.png"));
+
+    _.when(stack).then(function(){
+      output.savePng("out2.png", 0, function(err) {
+        res.end("test");
+        return console.log("image saved!");
+      });
+    });
+  }
 };

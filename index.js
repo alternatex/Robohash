@@ -13,73 +13,17 @@
 
  -------------------------------------------------- */
 
-var stack = [];
-var output = null;
-
-/* -------------------------------------------------- */
-/*                                                    */
-/* -------------------------------------------------- */
-
-var _ = require('underscore.deferred');
-var gd = require('node-gd');
-
-/* -------------------------------------------------- */
-/*                                                    */
-/* -------------------------------------------------- */
-
-output = gd.createTrueColor(300, 300);
-output.filledRectangle(0, 0, 300, 300, output.colorAllocate(255, 255, 0));
-
-stack.push(stackimage("assets/images/foreground/body/004-blue_body-04.png"));
-stack.push(stackimage("assets/images/foreground/face/000-blue_face-07.png"));
-stack.push(stackimage("assets/images/foreground/accessories/000-blue_accessory-01.png"));
-stack.push(stackimage("assets/images/foreground/mouth/006-blue_mouth-06.png"));
-stack.push(stackimage("assets/images/foreground/eyes/004-blue_eyes-03.png"));
-
-_.when(stack).then(function(){
-  output.savePng("out2.png", 0, function(err) {
-    return console.log("image saved!");
-  });
-
-  console.log("stacked.done");
-});
-
-/* -------------------------------------------------- */
-/*                                                    */
-/* -------------------------------------------------- */
-
-var colors = require('colors');
-
-colors.setTheme({
-  silly: 'rainbow',
-  input: 'grey',
-  verbose: 'cyan',
-  prompt: 'grey',
-  info: 'green',
-  data: 'grey',
-  help: 'cyan',
-  warn: 'yellow',
-  debug: 'blue',
-  error: 'red'
-});
+var bootstrap = require('./bootstrap.js'),
+    colors    = require('colors'),
+    qs        = require('querystring'),
+    restify   = require('restify'),
+    _         = require('underscore.deferred');
 
 /* -------------------------------------------------- */
 /*                                                    */
 /* -------------------------------------------------- */
 
 var port = port || 8080;
-
-/* -------------------------------------------------- */
-/*                                                    */
-/* -------------------------------------------------- */
-
-var gm = require('gm');
-var qs = require('querystring'); 
-var restify = require('restify');
-
-/* -------------------------------------------------- */
-/*                                                    */
-/* -------------------------------------------------- */
 
 var server = restify.createServer({
   name: 'robohash.js',
@@ -89,23 +33,6 @@ var server = restify.createServer({
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
 server.use(restify.bodyParser());
-
-console.log(__dirname);
-
-/* -------------------------------------------------- */
-/*                                                    */
-/* -------------------------------------------------- */
-
-var dir = __dirname + '/imgs';
-
-/* -------------------------------------------------- */
-/*                                                    */
-/* -------------------------------------------------- */
-
-server.get('/echo/:name', function (req, res, next) {
-  res.send(req.params);
-  return next();
-});
 
 /* -------------------------------------------------- */
 /*                                                    */
@@ -120,24 +47,13 @@ server.get(/\/assets\/?.*/, restify.serveStatic({
 /* -------------------------------------------------- */
 
 server.get('/image/:name', function (req, res, next) {
+  
+  // gather client ip
+  var ip = '192.168.1.10';
 
-  // set default values
-  var retval = {
-    sizex: 300,
-    sizey: 300,
-    format: "png",
-    bgset: "",
-    color: ""
-  };
+  // delegate
+  return bootstrap.handleXXX(req, res, next);
 });
-
-/* -------------------------------------------------- */
-/*                                                    */
-/* -------------------------------------------------- */
-
-var bootstrap = require('./bootstrap.js');
-var text = bootstrap.robo.join("\n").rainbow;
-console.log("bootstrap", bootstrap, text);
 
 /* -------------------------------------------------- */
 /*                                                    */
@@ -325,26 +241,3 @@ def main():
 if __name__ == "__main__":
     main()
 */
-
-function stackimage(filename){
-  var dfd = _.Deferred();
-
-  gd.openPng(filename, function(err, input_img) {
-    var dstH, dstW, dstX, dstY, srcH, srcW, srcX, srcY;
-    console.error("error: ", err);
-    console.log("width: ", input_img.width);
-    console.log("height: ", input_img.width);
-    dstX = 0;
-    dstY = 0;
-    srcX = 0;
-    srcY = 0;
-    dstW = 300;
-    dstH = 300;
-    srcW = 300;
-    srcH = 300;
-    input_img.copyResampled(output, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
-    dfd.resolve();
-  });
-
-  return dfd.promise();
-}
