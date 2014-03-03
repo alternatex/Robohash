@@ -6,9 +6,11 @@ JavaScript port of [RoboHash](https://github.com/e1ven/Robohash)
 OSX
 -------------
 
-`brew install gd`
-`brew install free`
-`brew install graphicsmagick`
+```
+brew install freeimage
+brew install gd
+brew install graphicsmagick
+```
 
 `npm install`
 
