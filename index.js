@@ -1,18 +1,53 @@
 #!/usr/bin/env node
 
+/* -------------------------------------------------- 
+
+  Example:
+  --------  
+  `curl http://localhost/robohash.js/xyz`
+
+  Resources:
+  ----------
+  - https://github.com/alternatex/robohash.js 
+  - https://github.com/e1ven/robohash
+
+ -------------------------------------------------- */
+
+var stack = [];
+var output = null;
+
 /* -------------------------------------------------- */
 /*                                                    */
 /* -------------------------------------------------- */
 
-// Project info:
-// https://github.com/alternatex/robohash.js 
-// https://github.com/e1ven/robohash
+var _ = require('underscore.deferred');
+var gd = require('node-gd');
 
 /* -------------------------------------------------- */
 /*                                                    */
 /* -------------------------------------------------- */
 
-// ---
+output = gd.createTrueColor(300, 300);
+output.filledRectangle(0, 0, 300, 300, output.colorAllocate(255, 255, 0));
+
+stack.push(stackimage("assets/images/foreground/body/004-blue_body-04.png"));
+stack.push(stackimage("assets/images/foreground/face/000-blue_face-07.png"));
+stack.push(stackimage("assets/images/foreground/accessories/000-blue_accessory-01.png"));
+stack.push(stackimage("assets/images/foreground/mouth/006-blue_mouth-06.png"));
+stack.push(stackimage("assets/images/foreground/eyes/004-blue_eyes-03.png"));
+
+_.when(stack).then(function(){
+  output.savePng("out2.png", 0, function(err) {
+    return console.log("image saved!");
+  });
+
+  console.log("stacked.done");
+});
+
+/* -------------------------------------------------- */
+/*                                                    */
+/* -------------------------------------------------- */
+
 var colors = require('colors');
 
 colors.setTheme({
@@ -33,18 +68,6 @@ colors.setTheme({
 /* -------------------------------------------------- */
 
 var port = port || 8080;
-
-/* -------------------------------------------------- */
-/*                                                    */
-/* -------------------------------------------------- */
-
-var pageres = require('pageres');
-
-pageres(['cnn.com'], ['240x720','480x240','860x480','1024x768', '1366x768', '1600x900'], function () {
-  console.log('done');
-}, function () {
-  console.log('done err');
-});
 
 /* -------------------------------------------------- */
 /*                                                    */
@@ -98,28 +121,15 @@ server.get(/\/assets\/?.*/, restify.serveStatic({
 
 server.get('/image/:name', function (req, res, next) {
 
-  gm(__dirname+'/assets/images/background/stripe.png')
-  .resize('200', '200')
-  .toBuffer(function (err, buffer) {
-    if (err) return handle(err);
-    res.end(buffer);
-    console.log('done!1');
-  });  
-  
-  var fs = require('fs');
-  require('images');
-
-  gm(__dirname+'/assets/images/foreground/accessories/000-blue_accessory-01.png')
-    .background('transparent')
-    .in(__dirname+'/assets/images/foreground/body/000-blue_body-10.png')
-    .background('transparent')
-    .in(__dirname+'/assets/images/foreground/accessories/002-blue_accessory-07.png')   
-    .toBuffer(function (err, buffer) {
-      if (err) return handle(err);
-      res.end(buffer);
-      console.log('done!2');
-    }); 
-  });
+  // set default values
+  var retval = {
+    sizex: 300,
+    sizey: 300,
+    format: "png",
+    bgset: "",
+    color: ""
+  };
+});
 
 /* -------------------------------------------------- */
 /*                                                    */
@@ -138,18 +148,11 @@ server.listen(port, function () {
 });
 
 /*
-from tornado.options import define, options
-import io
+ip = self.request.remote_ip
+  
 
-define("port", default=80, help="run on the given port", type=int)
-
-class MainHandler(tornado.web.RequestHandler):
-  def get(self):
-    ip = self.request.remote_ip
-      
-
-    random.shuffle(drquotes)
-    self.write(self.render_string('templates/root.html',ip=ip,robo=random.choice(robo),drquote1=drquotes[1],drquote2=drquotes[2],quotes=quotes))
+random.shuffle(drquotes)
+self.write(self.render_string('templates/root.html',ip=ip,robo=random.choice(robo),drquote1=drquotes[1],drquote2=drquotes[2],quotes=quotes))
 
 class ImgHandler(tornado.web.RequestHandler):
   """
@@ -157,14 +160,6 @@ class ImgHandler(tornado.web.RequestHandler):
   called as Robohash.org/$1, where $1 becomes the seed string for the Robohash obj
   """
   def get(self,string=None):
-    
-
-    # Set default values
-    sizex = 300
-    sizey = 300
-    format = "png"
-    bgset = None
-    color = None
 
     # Normally, we pass in arguments with standard HTTP GET variables, such as
     # ?set=any and &size=100x100
@@ -174,7 +169,7 @@ class ImgHandler(tornado.web.RequestHandler):
     # We'll translate /abc.png/s_100x100/set_any to be /abc.png?set=any&s=100x100
     # We're using underscore as a replacement for = and / as a replacement for [&?]
 
-    args = self.request.arguments.copy()
+    args = self.request.arguments.copy()  
 
     for k in list(args.keys()):
       v = args[k]
@@ -330,3 +325,26 @@ def main():
 if __name__ == "__main__":
     main()
 */
+
+function stackimage(filename){
+  var dfd = _.Deferred();
+
+  gd.openPng(filename, function(err, input_img) {
+    var dstH, dstW, dstX, dstY, srcH, srcW, srcX, srcY;
+    console.error("error: ", err);
+    console.log("width: ", input_img.width);
+    console.log("height: ", input_img.width);
+    dstX = 0;
+    dstY = 0;
+    srcX = 0;
+    srcY = 0;
+    dstW = 300;
+    dstH = 300;
+    srcW = 300;
+    srcH = 300;
+    input_img.copyResampled(output, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
+    dfd.resolve();
+  });
+
+  return dfd.promise();
+}
