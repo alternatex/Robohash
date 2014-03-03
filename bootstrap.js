@@ -1,6 +1,7 @@
-/* -------------------------------------------------- */
-/*                                                    */
-/* -------------------------------------------------- */
+/**
+* Bootstrap
+* @module robohash
+**/
 
 var colors    = require('colors'),
     gd        = require('node-gd'),
@@ -11,7 +12,7 @@ var colors    = require('colors'),
 /* -------------------------------------------------- */
 
 var robo = [
-  "\n", 
+  '                                 ',  
   '         \\             /        ',  
   '        __\\___________/__       ',  
   '       /                 \\      ',  
@@ -38,8 +39,8 @@ var robo = [
   '        |  |        |  |         ',  
   '        |__|        |__|         ',  
   '       / __ \\      / __ \\      ',  
-  '       OO  OO      OO  OO         ', 
-  "\n"
+  '       OO  OO      OO  OO        ',
+  '                                 '
 ];
               
 /* -------------------------------------------------- */
@@ -50,8 +51,6 @@ module.exports = {
 
   // ...
   robo: robo,
-  quotes: quotes,
-  drquotes: drquotes,
   
   /**
   * TBD
@@ -69,6 +68,7 @@ module.exports = {
 
     var format = "png";
     var stack = [];
+    var stacked = {};
 
     /**
     * Loads image onto stack
@@ -83,7 +83,7 @@ module.exports = {
 
       setTimeout(function(){
         gd.openPng(filename, function(err, image) {
-          image.copyResampled(output, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
+          stacked[filename]=image;          
           dfd.resolve();
         });
       }, 10);
@@ -91,17 +91,34 @@ module.exports = {
       return dfd.promise();
     }
 
+    // ...
     var output = null;
     output = gd.createTrueColor(300, 300);
     output.filledRectangle(0, 0, 300, 300, output.colorAllocate(255, 255, 0));
 
-    stack.push(load("assets/images/foreground/body/004-blue_body-04.png"));
-    stack.push(load("assets/images/foreground/face/000-blue_face-07.png"));
-    stack.push(load("assets/images/foreground/accessories/000-blue_accessory-01.png"));
-    stack.push(load("assets/images/foreground/mouth/006-blue_mouth-06.png"));
-    stack.push(load("assets/images/foreground/eyes/004-blue_eyes-03.png"));
+    // prepare images / layers in order *
+    var images = [
+      "assets/images/foreground/body/004-blue_body-04.png",
+      "assets/images/foreground/face/000-blue_face-07.png",
+      "assets/images/foreground/accessories/000-blue_accessory-01.png",
+      "assets/images/foreground/mouth/006-blue_mouth-06.png",
+      "assets/images/foreground/eyes/004-blue_eyes-03.png"
+    ];
 
+    // load images
+    images.forEach(function(image){
+      stack.push(load(image));
+    });
+
+    // when all stacked images are loaded
     _.when(stack).then(function(){
+
+      // post process in order
+      images.forEach(function(image){
+        stacked[image].copyResampled(output, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
+      })
+
+      // write to disk
       output.savePng("out2.png", 0, function(err) {
         res.end("test");
         return console.log("image saved!");
@@ -109,3 +126,5 @@ module.exports = {
     });
   }
 };
+
+console.log(robo.join("\n").rainbow);
