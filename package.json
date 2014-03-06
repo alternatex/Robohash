@@ -25,10 +25,10 @@
     "underscore": "~1.6.0",
     "restify": "~2.6.1",
     "colors": "~0.6.2",
-    "node-gd": "~0.2.3"
+    "node-gd": "~0.2.3",
+    "node-image": "~0.5.1"
   },
   "devDependencies": {
     "pageres": "~0.2.3"
   }
 }
-
