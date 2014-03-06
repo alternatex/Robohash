@@ -3,6 +3,17 @@ robohash.js
 
 JavaScript port of [RoboHash](https://github.com/e1ven/Robohash)
 
+OSX
+-------------
+
+```
+brew install freeimage
+brew install gd
+brew install graphicsmagick
+```
+
+`npm install`
+
 **Origin**
 
 >   RoboHash, the source code for the site RoboHash.org

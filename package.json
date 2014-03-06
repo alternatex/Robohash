@@ -21,8 +21,8 @@
     "node": "~0.10.20"
   },
   "dependencies": {
-    "gm": "~1.14.2",
     "underscore": "~1.6.0",
+    "underscore.deferred": "~0.4.0",
     "restify": "~2.6.1",
     "colors": "~0.6.2",
     "node-gd": "~0.2.3",
