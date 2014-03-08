@@ -17,7 +17,8 @@ var bootstrap = require('./bootstrap.js'),
     colors    = require('colors'),
     qs        = require('querystring'),
     restify   = require('restify'),
-    _         = require('underscore.deferred');
+    _         = require('underscore'),
+    _         = _.extend(_, require('underscore.deferred'));
 
 /* -------------------------------------------------- */
 /*                                                    */
@@ -31,7 +32,11 @@ var server = restify.createServer({
 });
 
 server.use(restify.acceptParser(server.acceptable));
+server.use(restify.authorizationParser());
+server.use(restify.dateParser());
 server.use(restify.queryParser());
+server.use(restify.jsonp());
+server.use(restify.gzipResponse());
 server.use(restify.bodyParser());
 
 /* -------------------------------------------------- */
@@ -59,6 +64,34 @@ server.get('/image/:name', function (req, res, next) {
 /*                                                    */
 /* -------------------------------------------------- */
 
+server.get('/.*/', function (req, res, next) {
+  
+  var parameters = ['gravatar','ignoreext','size','set','bgset','color'];
+  var options = {};
+
+  // Querystring-Proxy-Bust:
+  // -----------------------
+  // We'll translate /abc.png/set=100x100/set=any/ to be /abc.png?set=any&s=100x100
+  // We're using / as a replacement for [&?]
+  
+  var pathname = req._url.pathname.substring(1);
+  var segments = pathname.split("/");
+  segments.forEach(function(segment){
+    var pair = segment.split("=");
+    if(parameters.indexOf(pair[0])!=-1)
+      options[pair[0]]=pair[1];
+  });
+
+  console.log("options", options);
+
+});
+
+
+
+/* -------------------------------------------------- */
+/*                                                    */
+/* -------------------------------------------------- */
+
 server.listen(port, function () {
   console.log('%s listening at %s', server.name, server.url);
 });
@@ -66,24 +99,6 @@ server.listen(port, function () {
 /*
 ip = self.request.remote_ip
   
-# Normally, we pass in arguments with standard HTTP GET variables, such as
-# ?set=any and &size=100x100
-# 
-# Some sites don't like this though.. They cache it weirdly, or they just don't allow GET queries.
-# Rather than trying to fix the intercows, we can support this with directories... <grumble>
-# We'll translate /abc.png/s_100x100/set_any to be /abc.png?set=any&s=100x100
-# We're using underscore as a replacement for = and / as a replacement for [&?]
-
-args = self.request.arguments.copy()  
-
-for k in list(args.keys()):
-  v = args[k]
-  if type(v) is list:
-    if len(v) > 0:
-      args[k] = args[k][0]
-    else:
-      args[k] = ""
-
 # Detect if they're using the above slash-separated parameters.. 
 # If they are, then remove those parameters from the query string.
 # If not, don't remove anything.
