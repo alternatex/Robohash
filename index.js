@@ -13,7 +13,7 @@
 
  -------------------------------------------------- */
 
-var bootstrap = require('./bootstrap.js'),
+var bootstrap = require('./lib/robohash.js'),
     colors    = require('colors'),
     qs        = require('querystring'),
     restify   = require('restify'),
@@ -170,7 +170,6 @@ server.get('/.*/', function (req, res, next) {
     return encodeURIComponent(JSON.stringify(str));
   };
 
-
   var gravatar_url = '';
 
   if(!_.isUndefined(req.query['gravatar'])){
@@ -184,6 +183,12 @@ server.get('/.*/', function (req, res, next) {
 
   console.log("gravatar_url is: ", gravatar_url); 
 
+  var Robohash = function Robohash(hash){
+    this.hash = hash;
+  };
+
+  var robohash = new Robohash(hash);
+
   // ...
   return bootstrap.delegate(req, res, next, options);
 
@@ -191,13 +196,42 @@ server.get('/.*/', function (req, res, next) {
   res.end("bye");
 });
 
-
-
 /* -------------------------------------------------- */
 /*                                                    */
 /* -------------------------------------------------- */
 
 server.listen(port, function () {
+
+  console.log([
+    '                                 ',  
+    '         \\             /        ',  
+    '        __\\___________/__       ',  
+    '       /                 \\      ',  
+    '      /     ___    ___    \\     ',  
+    '      |    /   \\  /   \\   |    ',  
+    '      |    |  H || H  |   |      ',  
+    '      |    \\___/  \\___/   |    ',  
+    '      |                   |      ',  
+    '      |  \\             /  |     ',  
+    '      |   \\___________/   |     ',  
+    '      \\                   /     ',  
+    '       \\_________________/      ',  
+    '      _________|__|_______       ',  
+    '    _|                    |_     ',  
+    '   / |                    | \\   ',  
+    '  /  |            O O O   |  \\  ',  
+    '  |  |                    |  |   ',  
+    '  |  |            O O O   |  |   ',  
+    '  |  |                    |  |   ',  
+    '  /  |                    |  \\  ',  
+    ' |  /|                    |\\  | ',  
+    '  \\| |                    | |/  ',  
+    '     |____________________|      ',  
+    '        |  |        |  |         ',  
+    '        |__|        |__|         ',  
+    '       / __ \\      / __ \\      ',  
+    '       OO  OO      OO  OO        ',
+    '                                 '].join("\n").rainbow);  
   console.log('%s listening at %s', server.name, server.url);
 });
 
@@ -212,9 +246,6 @@ if args.get('gravatar','').lower() in ['hashed','yes']:
   except:
     args['avatar'] = False
       
-# Create our Robohashing object
-r = Robohash(string)
-
 
 # Allow users to manually specify a robot 'set' that they like.
 # Ensure that this is one of the allowed choices, or allow all
