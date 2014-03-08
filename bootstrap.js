@@ -14,19 +14,25 @@ var colors    = require('colors'),
 module.exports = {
 
   // ...
-  delegate: function delegate(req, res, next){
+  delegate: function delegate(req, res, next, options){
 
     var dstX = 0, dstY = 0,
         srcX = 0, srcY = 0,
-        dstW = 300, dstH = 300,            
-        srcW = 300, srcH = 300;
+        dstW = options.width, dstH = options.height,            
+        srcW = options.width, srcH = options.height;
 
     var format = "png";
     var stack = [];
     var stacked = {};
 
+    // TODO: cache
+    var cache = {
+      dir: '',
+      ttl: 31536000000 // 1 year in ms      
+    };
+
     /**
-    * Loads image onto stack
+    * load and stack image (w/promise)
     * 
     * @method load
     * @private
@@ -48,8 +54,15 @@ module.exports = {
 
     // ...
     var output = null;
-    output = gd.createTrueColor(300, 300);
-    output.filledRectangle(0, 0, 300, 300, output.colorAllocate(123, 123, 0));
+    output = gd.createTrueColor(options.width, options.height);
+
+    // apply background color options
+    var red   = options.red   || 123,
+        green = options.green || 123,
+        blue  = options.blue  || 0;
+
+    // initialize image
+    output.filledRectangle(0, 0, options.width, options.height, output.colorAllocate(red, green, blue));
 
     // prepare images / layers in order *
     var images = [
@@ -75,7 +88,11 @@ module.exports = {
 
       // write to disk
       output.savePng("out2.png", 0, function(err) {
-        res.end("test");
+
+      require('gm')("out2.png").toBuffer(function (err, buffer) {
+        if (err) return handle(err);
+          res.end(buffer);
+        });         
         return console.log("image saved!");
       });
     });

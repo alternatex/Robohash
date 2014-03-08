@@ -43,6 +43,11 @@ colors.setTheme({
 
 var port = port || 8080;
 
+var defaults = {
+  width: 300,
+  height: 300
+};
+
 var server = restify.createServer({
   name: 'robohash.js',
   version: '0.1.0'
@@ -60,7 +65,8 @@ server.use(restify.bodyParser());
 /*                                                    */
 /* -------------------------------------------------- */
 
-var parameters = ['gravatar','ignoreext','size','set','bgset','color'];
+var parameters = ['gravatar','ignoreext','size','set','bgset','color', 'red', 'green', 'blue'];
+var gravatar_baseurl = "https://secure.gravatar.com/avatar/";
 
 /* -------------------------------------------------- */
 /*                                                    */
@@ -109,28 +115,43 @@ server.get('/.*/', function (req, res, next) {
   });
 
   // process querystring (higher order)
-  _.chain(req.query).keys().each(function(queryparam){
-
-    // prepare mapping
-    var pair = [queryparam, req.query[queryparam]];
+  _.chain(req.query).keys().each(function(key){
 
     // process registered parameters only
-    if(parameters.indexOf(pair[0])!=-1){
+    if(parameters.indexOf(key)!=-1){
 
       // debug log
-      if(!_.isUndefined(options[pair[0]])){
-        console.log(("overwriting path with query param: "+JSON.stringify(pair)).info);
+      if(!_.isUndefined(options[key])){
+        console.log("override option".warn + " path " + JSON.stringify([key, options[key]]).info+" query "+JSON.stringify([key, req.query[key]]).info);
       }
 
       // assign/override
-      options[pair[0]] = pair[1];
+      options[key] = req.query[key];
 
     // fallback
     } else {
 
       // build hash
-      hash+=(hash.length>0?'&':'') + queryparam+(req.query[queryparam]? '='+req.query[queryparam]: '');
+      hash+=(hash.length>0?'&':'') + key+(req.query[key]? '='+req.query[key]: '');
     }
+  });
+
+  // ...
+  options.ignoreext = !_.isUndefined(req.query['ignoreext']);
+
+  // post process options: size
+  if(!_.isUndefined(options['size'])){
+    var size = options['size'].split('x');  
+    options.width  = (4096 >= size[0] && size[0]>0) ? size[0] : defaults.width;
+    options.height = (4096 >= size[1] && size[1]>0) ? size[1] : defaults.width;
+  } else {
+    options.width = defaults.width;
+    options.height = defaults.height;
+  }
+
+  // post process options: integer values
+  ['width', 'height', 'red', 'green', 'blue'].forEach(function(intVal){
+    options[intVal]=parseInt(0+options[intVal]);
   });
 
   // fallback
@@ -144,6 +165,27 @@ server.get('/.*/', function (req, res, next) {
   
   // say hi
   console.log("resource", resource, "hash", hash, "options", options, "query", req.query, "remote", clientip);
+
+  var urlencode = function urlencode(str){
+    return encodeURIComponent(JSON.stringify(str));
+  };
+
+
+  var gravatar_url = '';
+
+  if(!_.isUndefined(req.query['gravatar'])){
+    var crypto = require('crypto');
+    var md5sum = crypto.createHash('md5');
+    md5sum.update(hash);
+    hash = md5sum.digest('hex');
+  } 
+
+  gravatar_url = gravatar_baseurl + hash + "?" + urlencode({'default': 404, 'size': options.height});
+
+  console.log("gravatar_url is: ", gravatar_url); 
+
+  // ...
+  return bootstrap.delegate(req, res, next, options);
 
   // say bye
   res.end("bye");
@@ -159,43 +201,7 @@ server.listen(port, function () {
   console.log('%s listening at %s', server.name, server.url);
 });
 
-/*
-ip = self.request.remote_ip
-  
-
-# Ensure we have something to hash!
-if string is None:
-    string = self.request.remote_ip
-
-
-# Detect if the user has passed in a flag to ignore extensions.
-# Pass this along to to Robohash obj later on.
-
-ignoreext = args.get('ignoreext','false').lower() == 'true'
-
-# Split the size variable in to sizex and sizey
-if "size" in args:
-    sizex,sizey = args['size'].split("x")
-    sizex = int(sizex)
-    sizey = int(sizey)
-    if sizex > 4096 or sizex < 0:
-      sizex = 300
-    if sizey > 4096 or sizey < 0:
-      sizey = 300
-              
-# Allow Gravatar lookups - 
-# This allows people to pass in a gravatar-style hash, and return their gravatar image, instead of a Robohash.
-# This is often used for example, to show a Gravatar if it's set for an email, or a Robohash if not.
-if args.get('gravatar','').lower() == 'yes':
-  # They have requested that we hash the email, and send it to Gravatar.
-  default = "404"
-  gravatar_url = "https://secure.gravatar.com/avatar/" + hashlib.md5(string.lower()).hexdigest() + "?"
-  gravatar_url += urlencode({'default':default, 'size':str(sizey)})
-elif args.get('gravatar','').lower() == 'hashed':
-  # They have sent us a pre-hashed email address.
-  default = "404"
-  gravatar_url = "https://secure.gravatar.com/avatar/" + string + "?"
-  gravatar_url += urlencode({'default':default, 'size':str(sizey)})
+/*              
 
 # If we do want a gravatar, request one. If we can't get it, just keep going, and return a robohash
 if args.get('gravatar','').lower() in ['hashed','yes']:
@@ -266,17 +272,4 @@ else:
   b64ver = base64.b64encode(fakefile.read())
   b64ver = b64ver.decode('utf-8')
   self.write("data:image/png;base64," + str(b64ver))
-
-def main():
-tornado.options.parse_command_line()
-# timeout in seconds
-timeout = 10
-socket.setdefaulttimeout(timeout)
-
-settings = {
-"static_path": os.path.join(os.path.dirname(__file__), "static"),
-"cookie_secret": "9b90a85cfe46cad5ec136ee44a3fa332",
-"login_url": "/login",
-"xsrf_cookies": True,
-}
 */
