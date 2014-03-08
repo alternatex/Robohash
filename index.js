@@ -17,8 +17,13 @@ var bootstrap = require('./lib/robohash.js'),
     colors    = require('colors'),
     qs        = require('querystring'),
     restify   = require('restify'),
-    _         = require('underscore'),
-    _         = _.extend(_, require('underscore.deferred'));
+    _         = require('underscore');
+
+/* -------------------------------------------------- */
+/*                                                    */
+/* -------------------------------------------------- */
+
+_.mixin( require('underscore.deferred') );
 
 /* -------------------------------------------------- */
 /*                                                    */
@@ -143,7 +148,7 @@ server.get('/.*/', function (req, res, next) {
   if(!_.isUndefined(options['size'])){
     var size = options['size'].split('x');  
     options.width  = (4096 >= size[0] && size[0]>0) ? size[0] : defaults.width;
-    options.height = (4096 >= size[1] && size[1]>0) ? size[1] : defaults.width;
+    options.height = (4096 >= size[1] && size[1]>0) ? size[1] : defaults.height;
   } else {
     options.width = defaults.width;
     options.height = defaults.height;
@@ -163,31 +168,32 @@ server.get('/.*/', function (req, res, next) {
   // gather resource
   var resource = (appendix.indexOf('=')!=-1 || appendix=='')?'empty':appendix;
   
-  // say hi
-  console.log("resource", resource, "hash", hash, "options", options, "query", req.query, "remote", clientip);
-
+  // ...
   var urlencode = function urlencode(str){
     return encodeURIComponent(JSON.stringify(str));
   };
 
-  var gravatar_url = '';
-
+  // ...
   if(!_.isUndefined(req.query['gravatar'])){
-    var crypto = require('crypto');
-    var md5sum = crypto.createHash('md5');
+    var md5sum = require('crypto').createHash('md5');
     md5sum.update(hash);
     hash = md5sum.digest('hex');
   } 
-
-  gravatar_url = gravatar_baseurl + hash + "?" + urlencode({'default': 404, 'size': options.height});
+  
+  // ...
+  var gravatar_url = gravatar_baseurl + hash + "?" + urlencode({'default': 404, 'size': options.height});
 
   console.log("gravatar_url is: ", gravatar_url); 
 
+  // ...
   var Robohash = function Robohash(hash){
     this.hash = hash;
   };
 
   var robohash = new Robohash(hash);
+
+  // say hi
+  console.log("resource", resource, "hash", hash, "options", options, "query", req.query, "remote", clientip);
 
   // ...
   return bootstrap.delegate(req, res, next, options);
@@ -231,8 +237,12 @@ server.listen(port, function () {
     '        |__|        |__|         ',  
     '       / __ \\      / __ \\      ',  
     '       OO  OO      OO  OO        ',
-    '                                 '].join("\n").rainbow);  
+    '                                 ']
+    .join("\n").rainbow);
+
+  // ...
   console.log('%s listening at %s', server.name, server.url);
+
 });
 
 /*              
