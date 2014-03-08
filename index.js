@@ -24,6 +24,23 @@ var bootstrap = require('./bootstrap.js'),
 /*                                                    */
 /* -------------------------------------------------- */
 
+colors.setTheme({
+  silly: 'rainbow',
+  input: 'grey',
+  verbose: 'cyan',
+  prompt: 'grey',
+  info: 'green',
+  data: 'grey',
+  help: 'cyan',
+  warn: 'yellow',
+  debug: 'blue',
+  error: 'red'
+});
+
+/* -------------------------------------------------- */
+/*                                                    */
+/* -------------------------------------------------- */
+
 var port = port || 8080;
 
 var server = restify.createServer({
@@ -38,6 +55,12 @@ server.use(restify.queryParser());
 server.use(restify.jsonp());
 server.use(restify.gzipResponse());
 server.use(restify.bodyParser());
+
+/* -------------------------------------------------- */
+/*                                                    */
+/* -------------------------------------------------- */
+
+var parameters = ['gravatar','ignoreext','size','set','bgset','color'];
 
 /* -------------------------------------------------- */
 /*                                                    */
@@ -66,14 +89,17 @@ server.get('/image/:name', function (req, res, next) {
 
 server.get('/.*/', function (req, res, next) {
   
-  var parameters = ['gravatar','ignoreext','size','set','bgset','color'];
   var options = {};
+  var hash = '';
+  var clientip = req.headers['X-Forwarded-For'] || req.connection.remoteAddress;
 
-  // Querystring-Proxy-Bust:
+  // querystring-proxy-bust:
   // -----------------------
-  // We'll translate /abc.png/set=100x100/set=any/ to be /abc.png?set=any&s=100x100
-  // We're using / as a replacement for [&?]
+  // Two ways to set the robo's opts, by querystring or within the path  using / as a replacement for [&?].
+  // Example:
+  // /abc.png/set=100x100/set=any/ is translated/processed as /abc.png?set=any&s=100x100
   
+  // process pathname
   var pathname = req._url.pathname.substring(1);
   var segments = pathname.split("/");
   segments.forEach(function(segment){
@@ -82,8 +108,45 @@ server.get('/.*/', function (req, res, next) {
       options[pair[0]]=pair[1];
   });
 
-  console.log("options", options);
+  // process querystring (higher order)
+  _.chain(req.query).keys().each(function(queryparam){
 
+    // prepare mapping
+    var pair = [queryparam, req.query[queryparam]];
+
+    // process registered parameters only
+    if(parameters.indexOf(pair[0])!=-1){
+
+      // debug log
+      if(!_.isUndefined(options[pair[0]])){
+        console.log(("overwriting path with query param: "+JSON.stringify(pair)).info);
+      }
+
+      // assign/override
+      options[pair[0]] = pair[1];
+
+    // fallback
+    } else {
+
+      // build hash
+      hash+=(hash.length>0?'&':'') + queryparam+(req.query[queryparam]? '='+req.query[queryparam]: '');
+    }
+  });
+
+  // fallback
+  if(hash.length==0) hash = clientip;
+
+  // helper: appendix
+  var appendix = segments[segments.length-1];
+
+  // gather resource
+  var resource = (appendix.indexOf('=')!=-1 || appendix=='')?'empty':appendix;
+  
+  // say hi
+  console.log("resource", resource, "hash", hash, "options", options, "query", req.query, "remote", clientip);
+
+  // say bye
+  res.end("bye");
 });
 
 
@@ -99,17 +162,6 @@ server.listen(port, function () {
 /*
 ip = self.request.remote_ip
   
-# Detect if they're using the above slash-separated parameters.. 
-# If they are, then remove those parameters from the query string.
-# If not, don't remove anything.
-split = string.split('/')
-if len(split) > 1:
-  for st in split:
-    b = st.split('_')
-    if len(b) == 2:
-      if b[0] in ['gravatar','ignoreext','size','set','bgset','color']:
-        args[b[0]] = b[1]
-        string = re.sub("/" + st,'',string)
 
 # Ensure we have something to hash!
 if string is None:
