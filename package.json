@@ -7,6 +7,7 @@
     "example": "example"
   },
   "scripts": {
+    "configure": "yaml2json -o app.json app.yaml && exit 0",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
