@@ -28,7 +28,8 @@
     "colors": "~0.6.2",
     "node-gd": "~0.2.3",
     "node-image": "~0.5.1",
-    "yaml2json": "~1.0.2"
+    "yaml2json": "~1.0.2",
+    "superagent": "~0.17.0"
   },
   "devDependencies": {
     "pageres": "~0.2.3"

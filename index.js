@@ -23,6 +23,7 @@ var bootstrap = require('./lib/robohash.js'),
     colors    = require('colors'),
     qs        = require('querystring'),
     restify   = require('restify'),
+    request   = require('superagent'),
     _         = require('underscore');
 
 /* -------------------------------------------------- */
@@ -148,7 +149,7 @@ server.get('/.*/', function (req, res, next) {
     } else {
 
       // build hash
-      hash+=(hash.length>0?'&':'') + key+(req.query[key]? '='+req.query[key]: '');
+      //hash+=(hash.length>0?'&':'') + key+(req.query[key]? '='+req.query[key]: '');
     }
   });
 
@@ -185,6 +186,8 @@ server.get('/.*/', function (req, res, next) {
   };
 
   // ...
+  hash=resource;
+
   if(!_.isUndefined(req.query['gravatar'])){
     var md5sum = require('crypto').createHash('md5');
     md5sum.update(hash);
@@ -192,9 +195,30 @@ server.get('/.*/', function (req, res, next) {
   } 
   
   // ...
-  var gravatar_url = gravatar_baseurl + hash + "?" + urlencode({'default': 404, 'size': options.height});
+  var gravatar_url = gravatar_baseurl + hash + "?s=" + options.height;
 
   console.log("gravatar_url is: ", gravatar_url); 
+
+  if(_.indexOf(['hashed', 'true'], req.query['gravatar'])!=-1){
+    try {
+      var file = require('fs').createWriteStream("./fileeee.jpg");
+
+      var requested = request.get(gravatar_url).on('end', function(){
+        var temp = require('fs').createReadStream('./fileeee.jpg');
+        temp.on('data', function(data){
+          res.write(data);
+        }).on('end', function(data){
+          res.end(data);
+        });
+      }).pipe(file, {end: true});
+
+    } catch(ex){
+      console.log("Gravatar retrieval using url %s failed".error, gravatar_url, ex);
+    }
+  } else {
+    console.log("nahahahahah", req.query['gravatar'], req.query);
+
+  options.avatar = false;
 
   // ...
   var Robohash = function Robohash(hash){
@@ -211,6 +235,7 @@ server.get('/.*/', function (req, res, next) {
 
   // say bye
   res.end("bye");
+  }
 });
 
 /* -------------------------------------------------- */
