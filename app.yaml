@@ -1,0 +1,55 @@
+---
+# ---------------------------------- #
+# - Application
+# ---------------------------------- #
+
+name: Robohash.js
+description: "JavaScript Rewrite, Port, Spin-off o http://robohash.org"
+version: 1.0.0
+
+# ---------------------------------- #
+# - Environments
+# ---------------------------------- #
+
+environments:
+
+  # dev
+  development:
+    host: http://dev.robohashjs.local/
+    port: 80
+    debug: true
+    display: true
+    verbose: true
+
+  # live
+  production:
+    host: https://robohashjs.local/
+    port: 443    
+    debug: false
+    verbose: false
+
+# ---------------------------------- #
+# - Directories
+# ---------------------------------- #
+
+directories: &dirs
+
+  # resources
+  assets:
+    path: /assets
+
+  # cache
+  cache:
+    path: /cache
+
+
+# ---------------------------------- #
+# - Options
+# ---------------------------------- #
+
+options: &opts
+
+  # session
+  store:
+    store: Cookie
+    ttl: 525949 # year in seconds
