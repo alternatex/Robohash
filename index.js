@@ -13,6 +13,12 @@
 
  -------------------------------------------------- */
 
+var v = require('./package.json').version;
+
+/* -------------------------------------------------- */
+/*                                                    */
+/* -------------------------------------------------- */
+
 var bootstrap = require('./lib/robohash.js'),
     colors    = require('colors'),
     qs        = require('querystring'),
@@ -41,6 +47,11 @@ colors.setTheme({
   debug: 'blue',
   error: 'red'
 });
+
+console.log();
+console.log(" + ----------------------------- +");
+console.log(" + ---- Robohash.js ("+v+") ---- +");
+console.log(" + ----------------------------- +");
 
 /* -------------------------------------------------- */
 /*                                                    */
@@ -241,7 +252,7 @@ server.listen(port, function () {
     .join("\n").rainbow);
 
   // ...
-  console.log('%s listening at %s', server.name, server.url);
+  console.log('Listening at %s', server.url);
 
 });
 
