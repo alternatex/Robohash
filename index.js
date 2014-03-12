@@ -283,16 +283,6 @@ server.listen(port, function () {
 
 /*              
 
-# If we do want a gravatar, request one. If we can't get it, just keep going, and return a robohash
-if args.get('gravatar','').lower() in ['hashed','yes']:
-  try:
-    f = urlopen(gravatar_url)
-    self.redirect(gravatar_url, permanent=False)  
-    return
-  except:
-    args['avatar'] = False
-      
-
 # Allow users to manually specify a robot 'set' that they like.
 # Ensure that this is one of the allowed choices, or allow all
 # If they don't set one, take the first entry from sets above.

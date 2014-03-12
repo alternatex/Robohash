@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# ...
+hg clone http://hg.code.sf.net/p/graphicsmagick/code GM && cd GM
+
+# ...
+./configure --prefix=$OPENSHIFT_DATA_DIR/local
+
+# ...
+make
+make install
+
+# ...
+ln -s ~/app-root/data/local/bin/gm ~/.node_modules/.bin/
